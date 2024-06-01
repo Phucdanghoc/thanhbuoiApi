@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using ThanhBuoiAPI.Data;
 using ThanhBuoiAPI.Models;
+using System.Collections;
+using ThanhBuoiAPI.Models.DTO;
 
 namespace ThanhBuoiAPI.Controllers
 {
@@ -25,24 +26,70 @@ namespace ThanhBuoiAPI.Controllers
 
         [HttpGet]
         [Authorize(Roles = "USER")]
-        public IEnumerable<Chuyen> Get(int page = 1, string searchString = null)
+        public ActionResult Get(int page = 1, string? from = null, string? to = null, DateTime? datetime = null, string? type = null)
+        {
+            try
+            {
+                var listChuyen = GetPaginatedChuyens(page, from, to, datetime, type);
+                var jsonResult = JsonConvert.SerializeObject(listChuyen, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+
+                return Ok(jsonResult);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+        private IEnumerable<Chuyen> GetPaginatedChuyens(int page, string from = null, string to = null, DateTime? datetime = null, string type = null)
         {
             var query = _context.Chuyens
                 .Include(x => x.Xe)
+                    .ThenInclude(l => l.LoaiXe)
+                .Include(t => t.Tuyen)
+                    .ThenInclude(t => t.DiemDi)
+                .Include(t => t.Tuyen)
+                    .ThenInclude(t => t.DiemDen)
                 .OrderByDescending(c => c.ThoiGianDi)
-                .AsQueryable()
-                .Where(n => n.ThoiGianDi > DateTime.Now);
+                .Where(c => c.ThoiGianDi > DateTime.Now);
 
-            if (!string.IsNullOrEmpty(searchString))
+            // Các điều kiện lọc
+            if (!string.IsNullOrEmpty(type))
             {
-                query = query.Where(c => c.Ten.Contains(searchString));
+                if (type == "N")
+                {
+                    query = query.Where(c => c.Xe.LoaiXe.LoaiGheXe == LoaiGheXe.Ngoi);
+                }
+                else
+                {
+                    query = query.Where(c => c.Xe.LoaiXe.LoaiGheXe == LoaiGheXe.GiuongNam);
+                }
+            }
+            if (!string.IsNullOrEmpty(from))
+            {
+                query = query.Where(c => c.Tuyen.DiemDi.Ten.Contains(from));
             }
 
-            int startIndex = (page - 1) * PageSize;
-            var listChuyen = query.Skip(startIndex).Take(PageSize).ToList();
+            if (!string.IsNullOrEmpty(to))
+            {
+                query = query.Where(c => c.Tuyen.DiemDen.Ten.Contains(to));
+            }
 
-            return listChuyen;
+            if (datetime != null)
+            {
+                query = query.Where(c => c.ThoiGianDi.Date == datetime.Value.Date);
+            }
+
+            // Lấy dữ liệu phân trang
+            int startIndex = (page - 1) * PageSize;
+            var listChuyen = query.Skip(startIndex).Take(PageSize);
+
+            return listChuyen; // Trả về kết quả là IEnumerable<Chuyen>
         }
+
 
         // GET: api/Chuyen/5
         [HttpGet("{id}")]
@@ -53,7 +100,6 @@ namespace ThanhBuoiAPI.Controllers
                 .Include(x => x.Xe)
                 .ThenInclude(l => l.LoaiXe)
                 .Include(t => t.Tuyen)
-                 .Include(ve => ve.Ves)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (chuyen == null)
@@ -82,9 +128,9 @@ namespace ThanhBuoiAPI.Controllers
         [Route("ve/{id}")]
         public async Task<ActionResult> GetVeByChuyens(int id)
         {
-            var ve = await _context.Ves
-                .Include(a => a.Ghe)
-                .Where(v => v.Chuyen.Id == id && v.TrangThai == TrangThaiVe.Empty)
+            var ve = await _context.Ves.Include(c => c.Chuyen)
+                .Include(a => a.Ghe).ThenInclude(h => h.Hang)
+                .Where(v => v.Chuyen.Id == id )
                 .ToListAsync();
 
             if (!ve.Any())
@@ -92,7 +138,71 @@ namespace ThanhBuoiAPI.Controllers
                 return NotFound();
             }
 
-            return Ok(ve);
+            var jsonResult = JsonConvert.SerializeObject(ve, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            return Ok(jsonResult);
+        }
+
+        [HttpPost("search")]
+        public IActionResult SearchChuyens([FromBody] SearchDTO searchModel)
+        {
+            var chuyens = GetPaginatedChuyens(searchModel);
+
+            var jsonResult = JsonConvert.SerializeObject(chuyens, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            return Ok(jsonResult);
+        }
+
+        private IEnumerable<Chuyen> GetPaginatedChuyens(SearchDTO searchModel)
+        {
+            var query = _context.Chuyens
+                .Include(x => x.Xe)
+                    .ThenInclude(l => l.LoaiXe)
+                .Include(t => t.Tuyen)
+                    .ThenInclude(t => t.DiemDi)
+                .Include(t => t.Tuyen)
+                    .ThenInclude(t => t.DiemDen)
+                .OrderByDescending(c => c.ThoiGianDi)
+                .Where(c => c.ThoiGianDi > DateTime.Now)
+                .AsQueryable();
+
+            // Apply filters based on search model
+            if (!string.IsNullOrEmpty(searchModel.SeatType))
+            {
+                query = searchModel.SeatType switch
+                {
+                    "Ngồi" => query.Where(c => c.Xe.LoaiXe.LoaiGheXe == LoaiGheXe.Ngoi),
+                    "Giường Nằm" => query.Where(c => c.Xe.LoaiXe.LoaiGheXe == LoaiGheXe.GiuongNam),
+                    _ => query,
+                };
+            }
+            if (!string.IsNullOrEmpty(searchModel.FromLocation))
+            {
+                query = query.Where(c => c.Tuyen.DiemDi.Ten.Contains(searchModel.FromLocation));
+            }
+
+            if (!string.IsNullOrEmpty(searchModel.ToLocation))
+            {
+                query = query.Where(c => c.Tuyen.DiemDen.Ten.Contains(searchModel.ToLocation));
+            }
+
+            if (searchModel.SelectedDate != null)
+            {
+                query = query.Where(c => c.ThoiGianDi.Date == searchModel.SelectedDate.Value.Date);
+            }
+
+     
+
+            var listChuyen = query.ToList();
+
+            // Calculate total pages
+         
+       
+            return listChuyen;
         }
 
     }

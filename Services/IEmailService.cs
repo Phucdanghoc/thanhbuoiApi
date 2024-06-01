@@ -9,6 +9,6 @@ namespace ThanhBuoiAPI.Services
 
         string makeBodyEmailOrder(DonHang donhang);
 
-        string makeBodyTicketBooked(Ve ve);
+        string makeBodyTicketBooked(List<Ve> ve);
     }
 }

@@ -8,6 +8,7 @@ using ThanhBuoiAPI.Data;
 using ThanhBuoiAPI.Models;
 using ThanhBuoiAPI.Services;
 using ThanhBuoiAPI.Models.DTO;
+using Newtonsoft.Json;
 
 
 namespace ThanhBuoiAPI.Controllers
@@ -20,10 +21,12 @@ namespace ThanhBuoiAPI.Controllers
         // GET: api/<ValuesController>
         private readonly JWTService _jwtService;
         private readonly DataContext _context;
-        public VeController(JWTService jwtService,DataContext dataContext)
+        private readonly IEmailService _emailService;
+        public VeController(JWTService jwtService,DataContext dataContext, IEmailService emailService)
         {
             _jwtService = jwtService;
             _context = dataContext;
+            _emailService = emailService;
         }
         [HttpGet]
         public IActionResult Get()
@@ -32,9 +35,9 @@ namespace ThanhBuoiAPI.Controllers
             {
                 string userId = _jwtService.GetUserIdFromAuthorizationHeader(HttpContext);
                 var veList = _context.Ves
-                    .Include(g => g.Ghe)
-                    .Include(c => c.Chuyen)
-                    .Where(t => t.TaiKhoan.Id == userId)
+                    .Include(g => g.Ghe).ThenInclude(h => h.Hang)
+                    .Include(c => c.Chuyen).ThenInclude(x => x.Xe).ThenInclude(l => l.LoaiXe)
+                    .Where(t => t.TaiKhoan.Id == userId && t.TrangThai == TrangThaiVe.Booked)
                     .ToList();
 
                 var options = new JsonSerializerOptions
@@ -42,8 +45,11 @@ namespace ThanhBuoiAPI.Controllers
                     ReferenceHandler = ReferenceHandler.Preserve,
                     WriteIndented = true
                 };
-                var jsonResult = JsonSerializer.Serialize(veList, options);
-                return Content(jsonResult, "application/json");
+                var jsonResult = JsonConvert.SerializeObject(veList, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+                return Ok(jsonResult);
             }
             catch (ArgumentException ex)
             {
@@ -55,44 +61,58 @@ namespace ThanhBuoiAPI.Controllers
             }
         }
         [HttpPost]
-        public async Task<ActionResult<Ve>> Create([FromBody] VeDTO veDTO)
+        public async Task<ActionResult<IEnumerable<Ve>>> Create([FromBody] BookingRequest bookingRequest)
         {
             try
             {
                 string userId = _jwtService.GetUserIdFromAuthorizationHeader(HttpContext);
-                Ve? ve = await _context.Ves
-                    .Include(g => g.Ghe)
-                    .Include(c => c.Chuyen)
-                    .ThenInclude(x => x.Xe)
-                    .FirstOrDefaultAsync(v => v.Id == veDTO.Id);
+                List<Ve> createdTickets = new List<Ve>();
 
-                if (ve == null)
+                foreach (var veDTO in bookingRequest.Bookings)
                 {
-                    return NotFound($"Ticket with ID {veDTO.Id} not found.");
-                }
+                    Ve? ve = await _context.Ves
+                        .Include(c => c.Chuyen)
+                        .ThenInclude(x => x.Xe).ThenInclude(x => x.LoaiXe)
+                        .FirstOrDefaultAsync(v => v.Id == veDTO.Id);
 
-                ve.Ten = veDTO.Ten;
-                ve.CMND = veDTO.CMND;
-                ve.Sdt = veDTO.SDT;
-                ve.MaVe = $"TB-{ve.Chuyen.ThoiGianDi.Day}-{ve.Chuyen.Xe.MaXe}{veDTO.Id}";
-                ve.TrangThai = TrangThaiVe.Booked;
-                ve.TaiKhoan = await _context.Users.FindAsync(userId);
-                ve.Ghe.KhoangTrong = false;
-                ve.Hanhli = veDTO.HanhLi;
+                    if (ve == null)
+                    {
+                        return NotFound($"Ticket with ID {veDTO.Id} not found.");
+                    }
 
-                if (ve.Hanhli > 20)
-                {
-                    ve.Tien = ve.Chuyen.Gia + Math.Round((ve.Hanhli - 20) * 0.5);
+                    ve.Ten = veDTO.Ten;
+                    ve.CMND = veDTO.CMND;
+                    ve.Sdt = veDTO.SDT;
+                    ve.MaVe = $"TB-{ve.Chuyen.ThoiGianDi.Day}-{ve.Chuyen.Xe.MaXe}{veDTO.Id}";
+                    ve.TrangThai = TrangThaiVe.Booked;
+                    ve.TaiKhoan = await _context.Users.FindAsync(userId);
+                    ve.Hanhli = veDTO.HanhLi;
+                    ve.NgayTao = DateTime.Now;
+                    ve.email = bookingRequest.Email;
+                    ve.phuongthucthanhtoan = bookingRequest.Payment;
+                    if (ve.Hanhli > 20)
+                    {
+                        ve.Tien = (double)(ve.Chuyen.Gia +
+                                          Math.Round((ve.Hanhli - 20) * 0.1 * ve.Chuyen.Gia) +
+                                          (ve.Chuyen.Gia * ve.Chuyen.GiaTang));
+                    }
+                    else
+                    {
+                        ve.Tien = (double)(ve.Chuyen.Gia +
+                                            ve.Chuyen.Gia * ve.Chuyen.GiaTang);
+                    }
+             
+                    _context.Chuyens.Update(ve.Chuyen);
+                    _context.Ves.Update(ve);
+                    createdTickets.Add(ve);
                 }
-                else
+                if (bookingRequest.Email != "")
                 {
-                    ve.Tien = ve.Chuyen.Gia;
+                    var emailBody = _emailService.makeBodyTicketBooked(createdTickets);
+                    await _emailService.SendEmailAsync(bookingRequest.Email, "Xác nhận vé xe", emailBody);
                 }
-                _context.Chuyens.Update(ve.Chuyen);
-                _context.Ves.Update(ve);
                 await _context.SaveChangesAsync();
-                ve.TaiKhoan = null;
-                return Ok(ve);
+                return Ok(createdTickets);
             }
             catch (Exception e)
             {
@@ -100,9 +120,10 @@ namespace ThanhBuoiAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("Cancel/{id}")]
-        public async Task<ActionResult> Cancel(int id)
+
+        [HttpDelete]
+        [Route("Cancel")]
+        public async Task<ActionResult> Cancel([FromBody] int id)
         {
             string userId = _jwtService.GetUserIdFromAuthorizationHeader(HttpContext);
             Ve? ve = await _context.Ves
@@ -115,7 +136,7 @@ namespace ThanhBuoiAPI.Controllers
 
             try
             {
-                ve.TrangThai = TrangThaiVe.Cancel;
+                ve.TrangThai = TrangThaiVe.Empty;
                 ve.Ten = null;
                 ve.CMND = null;
                 ve.Sdt = null;
@@ -123,7 +144,6 @@ namespace ThanhBuoiAPI.Controllers
                 ve.TaiKhoan = null;
                 ve.Hanhli = 0;
                 ve.Tien = 0;
-                ve.Ghe.KhoangTrong = true;
                 _context.Ghes.Update(ve.Ghe);
                 _context.Ves.Update(ve);
                 await _context.SaveChangesAsync();

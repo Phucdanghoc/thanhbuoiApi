@@ -8,5 +8,11 @@
         public string Ten { get; set; }
         public int HanhLi { get; set; }
     }
+    public class BookingRequest
+    {
+        public List<VeDTO> Bookings { get; set; }
+        public string Payment { get; set; }
+        public string Email { get; set; }
+    }
 
 }

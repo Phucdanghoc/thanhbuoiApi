@@ -21,6 +21,7 @@ namespace ThanhBuoiAPI.Models
 
         [ForeignKey("ID_Chuyen")]
         public Chuyen Chuyen { get; set; }
+        public string? email { get; set; }
 
         public string? MaVe { get; set; }    
 
@@ -46,6 +47,7 @@ namespace ThanhBuoiAPI.Models
         public TrangThaiVe  TrangThai { get; set; }
 
         public int Hanhli { get; set; }
+        public string? phuongthucthanhtoan { get; set; }
 
         public DateTime NgayTao { get; set; }
 

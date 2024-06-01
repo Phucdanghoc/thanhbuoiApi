@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ThanhBuoiAPI.Models
 {
@@ -18,6 +19,7 @@ namespace ThanhBuoiAPI.Models
         [ForeignKey("ID_Hang")]
         public Hang Hang { get; set; }
 
+        [JsonIgnore]
         public  ICollection<Ve> Ves { get; set; }
 
     }
