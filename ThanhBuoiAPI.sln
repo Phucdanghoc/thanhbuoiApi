@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThanhBuoi", "..\ThanhBuoi\ThanhBuoi.csproj", "{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThanhBuoiAPI", "ThanhBuoiAPI.csproj", "{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThanhBuoiAPI", "ThanhBuoiAPI.csproj", "{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,12 +20,12 @@ Global
 		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.ThanhBuoiAPI|Any CPU.ActiveCfg = Debug|Any CPU
 		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.ThanhBuoiAPI|Any CPU.Build.0 = Debug|Any CPU
-		{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}.ThanhBuoiAPI|Any CPU.ActiveCfg = ThanhBuoiAPI|Any CPU
-		{D4DCA371-1890-47C0-8DF3-7AB758D65F1D}.ThanhBuoiAPI|Any CPU.Build.0 = ThanhBuoiAPI|Any CPU
+		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.ThanhBuoiAPI|Any CPU.ActiveCfg = ThanhBuoiAPI|Any CPU
+		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.ThanhBuoiAPI|Any CPU.Build.0 = ThanhBuoiAPI|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
