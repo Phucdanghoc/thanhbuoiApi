@@ -40,6 +40,7 @@ namespace ThanhBuoiAPI.Data
         public DbSet<DonHang> DonHangs { get; set; }
         public DbSet<DonHangChiTiet> DonHangChiTiets { get; set; }
         public DbSet<HangGui> HangGuis { get; set; }
+        public DbSet<VeHuy> VeHuys { get; set; }
         public DbSet<Chuyen> Chuyens { get; set; }
         public DbSet<Ve> Ves { get; set; }
         public DbSet<Ghe> Ghes { get; set; }

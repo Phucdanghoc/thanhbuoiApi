@@ -49,6 +49,7 @@ namespace ThanhBuoiAPI.Models
         public int Hanhli { get; set; }
         public string? phuongthucthanhtoan { get; set; }
 
+        public bool isCancel {  get; set; }
         public DateTime NgayTao { get; set; }
 
     }

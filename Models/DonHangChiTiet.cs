@@ -8,7 +8,6 @@ namespace ThanhBuoiAPI.Models
         [Key]
         public int Id { get; set; }
 
-
         [ForeignKey("ID_DonHang")]
         public DonHang DonHang { get; set; }
 

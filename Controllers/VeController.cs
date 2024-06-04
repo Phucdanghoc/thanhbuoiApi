@@ -125,10 +125,12 @@ namespace ThanhBuoiAPI.Controllers
         [Route("Cancel")]
         public async Task<ActionResult> Cancel([FromBody] int id)
         {
-            string userId = _jwtService.GetUserIdFromAuthorizationHeader(HttpContext);
             Ve? ve = await _context.Ves
-                                   .Include(g => g.Ghe).Where(t => t.TaiKhoan.Id == userId)
-                                   .FirstOrDefaultAsync(v => v.Id == id);
+                .Include(c => c.Chuyen)
+                    .ThenInclude(x => x.Xe).ThenInclude(l => l.LoaiXe)
+                .Include(g => g.Ghe)
+                .FirstOrDefaultAsync(v => v.Id == id);
+
             if (ve == null)
             {
                 return NotFound(new { Message = "Không tìm thấy vé để hủy." });
@@ -136,6 +138,28 @@ namespace ThanhBuoiAPI.Controllers
 
             try
             {
+                DateTime futureTime = DateTime.Now.AddHours(24);
+                if (ve.Chuyen.ThoiGianDi < futureTime)
+                {
+                    return BadRequest(new { Message = "Vé không thể hủy bây giờ" });
+                }
+
+                string phuongthucthanhtoan = ve.phuongthucthanhtoan;
+                double refund = Math.Round(ve.Tien * 0.7);
+                string body = _emailService.makeBodyTicketCancel(ve, refund);
+
+                VeHuy veHuy = new VeHuy
+                {
+                    chuyen = ve.Chuyen,
+                    Name = ve.Ten,
+                    ngaytao = DateTime.Now,
+                    hoantien = refund,
+                    CMND = ve.CMND,
+                    Ghe = ve.Ghe,
+                    Mave = ve.MaVe,
+                    Email = ve.email
+                };
+
                 ve.TrangThai = TrangThaiVe.Empty;
                 ve.Ten = null;
                 ve.CMND = null;
@@ -144,10 +168,18 @@ namespace ThanhBuoiAPI.Controllers
                 ve.TaiKhoan = null;
                 ve.Hanhli = 0;
                 ve.Tien = 0;
+                ve.phuongthucthanhtoan = null;
+                ve.isCancel = true;
+                ve.email = null;
+
                 _context.Ghes.Update(ve.Ghe);
+                _context.VeHuys.Add(veHuy);
                 _context.Ves.Update(ve);
                 await _context.SaveChangesAsync();
-                return Ok(new { Message = $"Đã hủy vé thành công." });
+
+                await _emailService.SendEmailAsync(veHuy.Email, "Xác nhận hủy vé", body);
+
+                return Ok(new { Message = $"Đã hủy vé" });
             }
             catch (Exception ex)
             {

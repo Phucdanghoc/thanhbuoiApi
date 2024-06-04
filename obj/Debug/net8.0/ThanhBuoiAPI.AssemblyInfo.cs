@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ThanhBuoiAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dcf73d244f7f2d667b39926a67e73ede5c91ad1b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3d511139b09dffd144e56342f61985bc2fb22e6f")]
 [assembly: System.Reflection.AssemblyProductAttribute("ThanhBuoiAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ThanhBuoiAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
