@@ -88,7 +88,7 @@ namespace ThanhBuoiAPI.Controllers
                     ve.TaiKhoan = await _context.Users.FindAsync(userId);
                     ve.Hanhli = veDTO.HanhLi;
                     ve.NgayTao = DateTime.Now;
-                    ve.email = bookingRequest.Email;
+                    ve.Email = bookingRequest.Email;
                     ve.phuongthucthanhtoan = bookingRequest.Payment;
                     if (ve.Hanhli > 20)
                     {
@@ -157,7 +157,7 @@ namespace ThanhBuoiAPI.Controllers
                     CMND = ve.CMND,
                     Ghe = ve.Ghe,
                     Mave = ve.MaVe,
-                    Email = ve.email
+                    Email = ve.Email
                 };
 
                 ve.TrangThai = TrangThaiVe.Empty;
@@ -169,8 +169,7 @@ namespace ThanhBuoiAPI.Controllers
                 ve.Hanhli = 0;
                 ve.Tien = 0;
                 ve.phuongthucthanhtoan = null;
-                ve.isCancel = true;
-                ve.email = null;
+                ve.Email = null;
 
                 _context.Ghes.Update(ve.Ghe);
                 _context.VeHuys.Add(veHuy);

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThanhBuoi", "..\ThanhBuoi\ThanhBuoi.csproj", "{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThanhBuoiAPI", "ThanhBuoiAPI.csproj", "{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThanhBuoi", "D:\.NET\ThanhBuoi\thanhbuoi\ThanhBuoi.csproj", "{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,18 +14,18 @@ Global
 		ThanhBuoiAPI|Any CPU = ThanhBuoiAPI|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.ThanhBuoiAPI|Any CPU.ActiveCfg = Debug|Any CPU
-		{425FB698-63E4-4AB5-AF08-6D4F7D9226E3}.ThanhBuoiAPI|Any CPU.Build.0 = Debug|Any CPU
 		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.ThanhBuoiAPI|Any CPU.ActiveCfg = ThanhBuoiAPI|Any CPU
 		{EDAEC63A-1F9F-4991-9A5A-98ECD4D0D0EF}.ThanhBuoiAPI|Any CPU.Build.0 = ThanhBuoiAPI|Any CPU
+		{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}.ThanhBuoiAPI|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDDBCE3-B008-4913-8A2F-77ADB8A28B37}.ThanhBuoiAPI|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

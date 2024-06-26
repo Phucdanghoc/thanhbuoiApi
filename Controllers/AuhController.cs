@@ -51,8 +51,9 @@ namespace ThanhBuoiAPI.Controllers
             {
                 Email = model.Email,
                 Ten = model.Ten,
-                UserName = model.Email.Split('@')[0],
-                PhoneNumber = model.SDT
+                UserName = model.Email,
+                PhoneNumber = model.SDT,
+                EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(newUser, model.Password);

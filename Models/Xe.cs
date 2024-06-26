@@ -31,7 +31,6 @@ namespace ThanhBuoiAPI.Models
 
         public TrangThaiXe Trangthai { get; set; }
         public string HangXe { get; set; }
-        public double TrongTaiHang { get; set; }
         [JsonIgnore]
         public ICollection<SoDoGhe> soDoGhes { get; set; }
 

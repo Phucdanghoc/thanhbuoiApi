@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Text.Json.Serialization;
-using System.Text.Json;
 using ThanhBuoiAPI.Data;
 using ThanhBuoiAPI.Models;
-using System.Collections;
 using ThanhBuoiAPI.Models.DTO;
 
 namespace ThanhBuoiAPI.Controllers
