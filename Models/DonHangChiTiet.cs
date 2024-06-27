@@ -8,11 +8,16 @@ namespace ThanhBuoiAPI.Models
         [Key]
         public int Id { get; set; }
 
+
         [ForeignKey("ID_DonHang")]
         public DonHang DonHang { get; set; }
 
         [ForeignKey("ID_HangGui")]
-        public HangGui HangGui { get; set; }
+        public HangGui? HangGui { get; set; }
+
+
+        [ForeignKey("ID_Ve")]
+        public Ve? Ve { get; set; }
 
         public double Tien { get; set; }
 

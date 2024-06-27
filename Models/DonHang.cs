@@ -14,6 +14,10 @@ namespace ThanhBuoiAPI.Models
         [Key]
         public int Id { get; set; }
 
+        [ForeignKey("ID_TaiKhoan")]
+        public TaiKhoan? TaiKhoan { get; set; }
+        public string MaDon { get; set; }
+
         [StringLength(255)]
         public string? RequestId { get; set; }
 
@@ -23,7 +27,7 @@ namespace ThanhBuoiAPI.Models
         public double Tien { get; set; }
 
         public double TienPhaiTra { get; set; }
-         
+
         [StringLength(255)]
         public string? PhuongThucThanhToan { get; set; }
 
@@ -34,7 +38,7 @@ namespace ThanhBuoiAPI.Models
         public TrangThaiDonHang? Trangthai { get; set; }
 
         public DateTime NgayTao { get; set; }
-        public string? email { get; set; }
+        public string? Email { get; set; }
         public ICollection<DonHangChiTiet> DonHangChiTiets { get; set; }
     }
 }

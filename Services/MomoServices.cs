@@ -22,7 +22,7 @@ namespace ThanhBuoiApi.Services
             var partnerCode = "MOMO";
             var redirectUrl = paymentDTO.url;
             var ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
-            var requestType = "payWithMethod";
+            var requestType = "payWithATM";
             var amount = paymentDTO.cost;
             var orderId = partnerCode + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var requestId = orderId;

@@ -66,8 +66,19 @@ namespace ThanhBuoiAPI.Controllers
             try
             {
                 string userId = _jwtService.GetUserIdFromAuthorizationHeader(HttpContext);
+                var userCurrent = await _context.Users.FindAsync(userId);
                 List<Ve> createdTickets = new List<Ve>();
 
+                DonHang donhang = new DonHang
+                {
+                    PhuongThucThanhToan = bookingRequest.Payment,
+                    Email = bookingRequest.Email,
+                    NgayTao = DateTime.Now,
+                    TaiKhoan = userCurrent,
+                    MaDon   = $"DV{int.Parse(DateTime.Now.ToString("MMddHHmmss"))}",
+                    Trangthai = TrangThaiDonHang.Payment,
+
+                };
                 foreach (var veDTO in bookingRequest.Bookings)
                 {
                     Ve? ve = await _context.Ves
@@ -85,7 +96,7 @@ namespace ThanhBuoiAPI.Controllers
                     ve.Sdt = veDTO.SDT;
                     ve.MaVe = $"TB-{ve.Chuyen.ThoiGianDi.Day}-{ve.Chuyen.Xe.MaXe}{veDTO.Id}";
                     ve.TrangThai = TrangThaiVe.Booked;
-                    ve.TaiKhoan = await _context.Users.FindAsync(userId);
+                    ve.TaiKhoan = userCurrent;
                     ve.Hanhli = veDTO.HanhLi;
                     ve.NgayTao = DateTime.Now;
                     ve.Email = bookingRequest.Email;
@@ -101,17 +112,26 @@ namespace ThanhBuoiAPI.Controllers
                         ve.Tien = (double)(ve.Chuyen.Gia +
                                             ve.Chuyen.Gia * ve.Chuyen.GiaTang);
                     }
-             
+                    DonHangChiTiet donHangChiTiet = new DonHangChiTiet 
+                    {
+                        DonHang = donhang,
+                        Ve  = ve,
+                        Tien = ve.Tien,
+                    };
+                    _context.DonHangChiTiets.Add(donHangChiTiet);
                     _context.Chuyens.Update(ve.Chuyen);
                     _context.Ves.Update(ve);
                     createdTickets.Add(ve);
                 }
+                donhang.Tien = createdTickets.Sum(t => t.Tien);
+                _context.DonHangs.Add(donhang);
+                await _context.SaveChangesAsync();
+
                 if (bookingRequest.Email != "")
                 {
                     var emailBody = _emailService.makeBodyTicketBooked(createdTickets);
                     await _emailService.SendEmailAsync(bookingRequest.Email, "Xác nhận vé xe", emailBody);
                 }
-                await _context.SaveChangesAsync();
                 return Ok(createdTickets);
             }
             catch (Exception e)
@@ -125,10 +145,10 @@ namespace ThanhBuoiAPI.Controllers
         [Route("Cancel")]
         public async Task<ActionResult> Cancel([FromBody] int id)
         {
-            Ve? ve = await _context.Ves
-                .Include(c => c.Chuyen)
-                    .ThenInclude(x => x.Xe).ThenInclude(l => l.LoaiXe)
-                .Include(g => g.Ghe)
+            var ve = await _context.Ves
+                .Include(t => t.TaiKhoan)
+                .Include(v => v.Chuyen).ThenInclude(c => c.Xe).ThenInclude(l => l.LoaiXe)
+                .Include(v => v.Ghe)
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (ve == null)
@@ -147,7 +167,15 @@ namespace ThanhBuoiAPI.Controllers
                 string phuongthucthanhtoan = ve.phuongthucthanhtoan;
                 double refund = Math.Round(ve.Tien * 0.7);
                 string body = _emailService.makeBodyTicketCancel(ve, refund);
+                var donHangChiTiet = await _context.DonHangChiTiets
+                   .Include(dhct => dhct.Ve)
+                   .Include(dhct => dhct.DonHang)
+                   .FirstOrDefaultAsync(dhct => dhct.Ve.MaVe == ve.MaVe);
 
+                var donHang = await _context.DonHangs
+                    .Include(d => d.DonHangChiTiets)
+                    .FirstOrDefaultAsync(d => d.Id == donHangChiTiet.DonHang.Id);
+                donHang.Tien -= ve.Tien;
                 VeHuy veHuy = new VeHuy
                 {
                     chuyen = ve.Chuyen,
@@ -167,12 +195,13 @@ namespace ThanhBuoiAPI.Controllers
                 ve.MaVe = null;
                 ve.TaiKhoan = null;
                 ve.Hanhli = 0;
+                ve.DiemDon = "";
                 ve.Tien = 0;
                 ve.phuongthucthanhtoan = null;
                 ve.Email = null;
 
-                _context.Ghes.Update(ve.Ghe);
                 _context.VeHuys.Add(veHuy);
+                _context.DonHangChiTiets.Remove(donHangChiTiet);
                 _context.Ves.Update(ve);
                 await _context.SaveChangesAsync();
 
